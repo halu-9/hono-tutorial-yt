@@ -38,4 +38,45 @@ app.get("/posts/:id", (c) => {
   }
 });
 
+// 投稿（post）
+app.post("/posts", async (c) => {
+  const { title, content } = await c.req.json<{
+    title: string;
+    content: string;
+  }>();
+  const newPost = { id: String(blogPosts.length + 1), title, content };
+  blogPosts = [...blogPosts, newPost];
+
+  return c.json(newPost, 201);
+});
+
+// 更新(put)
+app.put("/posts/:id", async (c) => {
+  const id = c.req.param("id");
+  const index = blogPosts.findIndex((p) => p.id === id);
+
+  if (index === -1) {
+    return c.json({ message: "Post not found" }, 404);
+  }
+
+  const { title, content } = await c.req.json();
+  blogPosts[index] = { ...blogPosts[index], title, content };
+
+  return c.json(blogPosts[index]);
+});
+
+// 削除(delete)
+app.delete("/posts/:id", async (c) => {
+  const id = c.req.param("id");
+  const index = blogPosts.findIndex((p) => p.id === id);
+
+  if (index === -1) {
+    return c.json({ message: "Post not found" }, 404);
+  }
+
+  blogPosts = blogPosts.filter((p) => p.id !== id);
+
+  return c.json({ message: "Blog Post Deleted" });
+});
+
 export default app;
